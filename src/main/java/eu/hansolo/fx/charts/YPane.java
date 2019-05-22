@@ -21,12 +21,7 @@ import eu.hansolo.fx.charts.font.Fonts;
 import eu.hansolo.fx.charts.series.YSeries;
 import eu.hansolo.fx.charts.tools.Helper;
 import eu.hansolo.fx.charts.tools.Point;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.BooleanPropertyBase;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.DoublePropertyBase;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.VPos;
@@ -79,6 +74,9 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
     private              double                _upperBoundY;
     private              DoubleProperty        upperBoundY;
 
+    private            ReadOnlyObjectWrapper<T> hoveredYItem;
+    private            ReadOnlyObjectWrapper<T> clickedYItem;
+
 
     // ******************** Constructors **************************************
     public YPane(final YSeries<T>... SERIES) {
@@ -96,8 +94,12 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         _lowerBoundY       = 0;
         _upperBoundY       = 100;
         valid              = isChartTypeValid();
+        hoveredYItem       = new ReadOnlyObjectWrapper<>(null);
+        clickedYItem       = new ReadOnlyObjectWrapper<>(null);
         initGraphics();
+        initMouseInteractions();
         registerListeners();
+
     }
 
 
@@ -118,6 +120,71 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
         ctx    = canvas.getGraphicsContext2D();
 
         getChildren().setAll(canvas);
+    }
+
+    private void initMouseInteractions(){
+
+        this.setOnMouseClicked(event->{
+            double mouseX = event.getX();
+            double mouseY = event.getY();
+            // Note with this implementation information is only given on the last series drawn...
+            if(this.ctx.isPointInPath(mouseX,mouseY)){
+                YSeries<T> series = this.getListOfSeries().get(this.getListOfSeries().size()-1);
+                int nbItems = series.getNoOfItems();
+                double angle = Helper.getAngleFromXY(mouseX,mouseY,this.getWidth()/2., this.getHeight()/2.);
+                int sectorSize = 360 / nbItems;
+                int selectedIndex;
+                switch(series.getChartType()){
+                    case SMOOTH_RADAR_POLYGON:
+                    case RADAR_POLYGON:
+                        angle = (360+(angle - (sectorSize/2))) % 360;
+                        selectedIndex = ((int)(angle / sectorSize)+1) % nbItems;
+                        break;
+                    case RADAR_SECTOR:
+                        selectedIndex = ((int)(angle / sectorSize)) % nbItems;
+                        break;
+                    default:
+                        this.setClickedYItem(null);
+                        return;
+                }
+                this.setClickedYItem(this.getListOfSeries().get(this.getListOfSeries().size()-1).getItems().get(selectedIndex));
+            }
+            else{
+                this.setClickedYItem(null);
+            }
+        });
+
+        this.setOnMouseMoved(event->{
+
+
+            double mouseX = event.getX();
+            double mouseY = event.getY();
+            // Note with this implementation information is only given on the last series drawn...
+            if(this.ctx.isPointInPath(mouseX,mouseY)){
+                YSeries<T> series = this.getListOfSeries().get(this.getListOfSeries().size()-1);
+                int nbItems = series.getNoOfItems();
+                double angle = Helper.getAngleFromXY(mouseX,mouseY,this.getWidth()/2., this.getHeight()/2.);
+                int sectorSize = 360 / nbItems;
+                int selectedIndex;
+                switch(series.getChartType()){
+                    case SMOOTH_RADAR_POLYGON:
+                    case RADAR_POLYGON:
+                        angle = (360+(angle - (sectorSize/2))) % 360;
+                        selectedIndex = ((int)(angle / sectorSize)+1) % nbItems;
+                        break;
+                    case RADAR_SECTOR:
+                        selectedIndex = ((int)(angle / sectorSize)) % nbItems;
+                        break;
+                    default:
+                        this.setHoveredYItem(null);
+                        return;
+                }
+                this.setHoveredYItem(this.getListOfSeries().get(this.getListOfSeries().size()-1).getItems().get(selectedIndex));
+            }
+            else{
+                this.setHoveredYItem(null);
+            }
+        });
     }
 
     private void registerListeners() {
@@ -277,6 +344,30 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                 ChartType.SMOOTH_RADAR_POLYGON == type) { return true; }
         }
         return false;
+    }
+
+    private void setClickedYItem(T item){
+        this.clickedYItem.setValue(item);
+    }
+
+    private T getClickedYItem(){
+        return this.clickedYItem.getValue();
+    }
+
+    public ReadOnlyObjectProperty<T> clickedYItemProperty() {
+        return clickedYItem.getReadOnlyProperty();
+    }
+
+    private void setHoveredYItem(T item){
+        this.hoveredYItem.setValue(item);
+    }
+
+    private T getHoveredYItem(){
+        return this.hoveredYItem.getValue();
+    }
+
+    public ReadOnlyObjectProperty<T> hoveredYItemProperty() {
+        return hoveredYItem.getReadOnlyProperty();
     }
 
 

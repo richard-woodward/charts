@@ -20,8 +20,10 @@ import eu.hansolo.fx.charts.data.YItem;
 import eu.hansolo.fx.charts.series.YSeries;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.StringPropertyBase;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 
@@ -44,13 +46,21 @@ public class YChart<T extends YItem> extends Region {
     private              String         _subTitle;
     private              StringProperty subTitle;
     private              AnchorPane     pane;
+    private              Tooltip        tooltip;
 
 
     // ******************** Constructors **************************************
     public YChart(final YPane<T> Y_PANE) {
+        this(Y_PANE,"");
+    }
+
+    public YChart(final YPane<T> Y_PANE, final String TITLE){
+
         if (null == Y_PANE) { throw new IllegalArgumentException("YPane has not to be null"); }
         yPane = Y_PANE;
+        this.setTitle(TITLE);
         initGraphics();
+        initTooltip();
         registerListeners();
     }
 
@@ -71,6 +81,20 @@ public class YChart<T extends YItem> extends Region {
         pane = new AnchorPane(yPane);
 
         getChildren().setAll(pane);
+    }
+
+    private void initTooltip() {
+        this.tooltip = new Tooltip(this.getTitle());
+        Tooltip.install(this, this.tooltip);
+        this.getYPane().hoveredYItemProperty().addListener((ChangeListener<T>)(obs, oldV, newV)->{
+          if(null == newV){
+              this.tooltip.setText(this.getTitle());
+          }
+          else{
+              this.tooltip.setText(newV.getName());
+          }
+        });
+
     }
 
     private void registerListeners() {
