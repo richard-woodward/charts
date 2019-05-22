@@ -23,6 +23,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -104,6 +105,9 @@ public class RadarChartTest extends Application {
     @Override public void start(Stage stage) {
         StackPane pane  = new StackPane(chart);
         Scene     scene = new Scene(pane);
+
+        this.chart.getYPane().clickedYItemProperty().addListener((ChangeListener) (observable, oldValue,
+                                                                                    newValue) -> System.out.println("You selected " + newValue + " option!"));
 
         stage.setTitle("RadarChart");
         stage.setScene(scene);
