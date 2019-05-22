@@ -76,6 +76,7 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
 
     private            ReadOnlyObjectWrapper<T> hoveredYItem;
     private            ReadOnlyObjectWrapper<T> clickedYItem;
+    private int offset;
 
 
     // ******************** Constructors **************************************
@@ -520,12 +521,15 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                 break;
             case RADAR_SECTOR:
                 Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, -90);
+                double startAngle = angleStep;
+                ctx.beginPath();
+                ctx.moveTo(CENTER_X, CENTER_Y);
                 SERIES.getItems().forEach(item -> {
                     double r1 = (item.getY() - LOWER_BOUND_Y) / DATA_RANGE;
-                    ctx.beginPath();
-                    ctx.moveTo(CENTER_X, CENTER_Y);
-                    ctx.arc(CENTER_X, CENTER_Y, r1 * RANGE + OFFSET, r1 * RANGE + OFFSET, 0, -angleStep);
-                    ctx.closePath();
+                    
+                    ctx.arc(CENTER_X, CENTER_Y, r1 * RANGE + OFFSET, r1 * RANGE + OFFSET, -(startAngle*offset), -angleStep);
+                    ctx.lineTo(CENTER_X,CENTER_Y);
+                    offset++;
                     ctx.fill();
                     ctx.stroke();
 
