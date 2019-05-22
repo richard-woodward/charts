@@ -63,13 +63,13 @@ public class RadarChartTest extends Application {
         for (int i = 0 ; i < ELEMENTS ; i++) {
             YChartItem dataPoint;
 
-            dataPoint = new YChartItem(RND.nextDouble() * 100, "P" + i);
+            dataPoint = new YChartItem(i * (100/30), "P" + i);
             item1.add(dataPoint);
 
-            dataPoint = new YChartItem(RND.nextDouble() * 100, "P" + i);
+            dataPoint = new YChartItem(i * (100/30), "P" + i);
             item2.add(dataPoint);
 
-            dataPoint = new YChartItem(RND.nextDouble() * 100, "P" + i);
+            dataPoint = new YChartItem(i * (100/30), "P" + i);
             item3.add(dataPoint);
         }
 
@@ -77,19 +77,20 @@ public class RadarChartTest extends Application {
         series2 = new YSeries(item1, CHART_TYPE, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(255, 0, 0, 0.25)), new Stop(0.5, Color.rgb(255, 255, 0, 0.5)), new Stop(1.0, Color.rgb(0, 200, 0, 0.75))), Color.TRANSPARENT);
         series3 = new YSeries(item2, CHART_TYPE, new RadialGradient(0, 0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop(0.0, Color.rgb(0, 255, 255, 0.25)), new Stop(0.5, Color.rgb(0, 255, 255, 0.5)), new Stop(1.0, Color.rgb(0, 0, 255, 0.75))), Color.TRANSPARENT);
         series2.setWithWrapping(true);
-        chart   = new YChart(new YPane(series1, series2, series3));
+        series3.setSymbolsVisible(false);
+        chart   = new YChart(new YPane(/*series1, series2,*/ series3));
         chart.setPrefSize(600, 600);
 
         timeline      = new Timeline();
         lastTimerCall = System.nanoTime();
         timer         = new AnimationTimer() {
             @Override public void handle(final long now) {
-                if (now > lastTimerCall + INTERVAL) {
-                    animateData();
-                    long delta = System.nanoTime() - now;
-                    timeline.play();
-                    lastTimerCall = now + delta;
-                }
+//                if (now > lastTimerCall + INTERVAL) {
+//                    animateData();
+//                    long delta = System.nanoTime() - now;
+//                    timeline.play();
+//                    lastTimerCall = now + delta;
+//                }
             }
         };
 

@@ -442,7 +442,24 @@ public class YPane<T extends YItem> extends Region implements ChartArea {
                 });
                 break;
         }
-        ctx.restore();
+        this.ctx.restore();
+        if(SERIES.getSymbolsVisible()) {
+            ctx.save();
+            if (ChartType.RADAR_SECTOR == SERIES.getChartType()) {
+                System.out.println(angleStep*0.5);
+                Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, (angleStep * 0.5));
+            }
+
+            ctx.setFont(Fonts.latoRegular(0.04 * size));
+            ctx.setTextAlign(TextAlignment.CENTER);
+            ctx.setTextBaseline(VPos.CENTER);
+            ctx.setFill(Color.BLACK);
+            for (int i = 0; i < NO_OF_SECTORS; i++) {
+                ctx.fillText(SERIES.getItems().get(i).getName(), CENTER_X, size * 0.02);
+                Helper.rotateCtx(ctx, CENTER_X, CENTER_Y, angleStep);
+            }
+            ctx.restore();
+        }
     }
 
     private void drawRadarOverlay(final int NO_OF_SECTORS, final ChartType TYPE) {
